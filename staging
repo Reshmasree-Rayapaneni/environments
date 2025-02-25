@@ -1,0 +1,120 @@
+To achieve the flow where changes made by developers first go into the stage branch (staging environment) and then later get merged into the main branch (production environment), you can implement a workflow that ensures this. Here’s a detailed explanation of the steps you need to take and the changes you need to make in your GitHub Actions workflow:
+Step-by-Step Process
+
+    Create and Set Up staging Branch:
+        Ensure that you have a staging branch in your repository. This will be the intermediate branch where all changes from developers will be pushed.
+        Developers will create pull requests (PRs) targeting the staging branch first, instead of main.
+
+    Modify Workflow to Trigger on staging Branch:
+        You need to modify your GitHub Actions workflow so that it can trigger builds for both the staging and main branches.
+        You will also have separate logic to handle the build and deployment for both branches.
+
+Changes to GitHub Actions Workflow
+
+You need to make a few changes to the workflow file you’ve shared. Below are the necessary updates to support your desired flow:
+1. Update Trigger for staging Branch:
+
+Modify the trigger so that the workflow will also trigger on staging branch pushes, in addition to main and release/*.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - "main"
+      - "staging"       # Add staging branch trigger
+      - "release/*"
+
+2. Add Logic for Separate Staging and Production Builds:
+
+You want to build and deploy different tags or environments based on whether the change is in the staging or main branch.
+
+Here is how you can update your workflow to handle both branches:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Export repo name to GitHub env
+        run: |
+          echo "REPO=$(printf ${GITHUB_REPOSITORY} | sed 's~dhanmitra/~~g')" >> $GITHUB_ENV
+          
+      - name: Export commit id to GitHub env
+        run: |
+          echo "COMMIT_ID=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+          
+      - name: Export image tag to GitHub env
+        run: |
+          echo "TAG=$(echo ${GITHUB_REF_NAME} | sed 's~/~_~g')" >> $GITHUB_ENV
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        id: dockerbuild
+        continue-on-error: true
+        with:
+          context: .
+          platforms: linux/arm64 #linux/amd64
+          push: true
+          tags: |
+            dhanmitra/${{ env.REPO }}:${{ env.TAG }}
+            # Additional tag based on branch
+            dhanmitra/${{ env.REPO }}:${{ env.TAG }}-${{ github.ref_name }}
+
+      - name: Send message to Slack API
+        if: always()
+        run: |
+          if [[ "${{ steps.dockerbuild.outputs.ImageID }}" == "" ]]
+          then
+            TEXT=":whale: *dhanmitra/${{ env.REPO }}:${{ env.TAG }}* build is *FAILED* :x: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|*Build Link*>"
+            curl -X POST "https://slack.com/api/chat.postMessage" -H "Content-type: application/json" -H "Authorization: Bearer ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}" -d "{\"channel\": \"C07CLEPM4VD\",\"text\": \"$TEXT\"}"
+            echo "Image Build FAILED!"
+            exit 1
+          else
+            TEXT=":whale: *dhanmitra/${{ env.REPO }}:${{ env.TAG }}* build is *SUCCESSFUL* :white_check_mark: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|*Build Link*>"
+            curl -X POST "https://slack.com/api/chat.postMessage" -H "Content-type: application/json" -H "Authorization: Bearer ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}" -d "{\"channel\": \"C07CLEPM4VD\",\"text\": \"$TEXT\"}"
+          fi
+
+Key Changes:
+
+    The push event now triggers on main, staging, and release/* branches.
+    The Docker tags include a branch-specific tag, so it’s clear whether the image is for staging or production.
+    Slack messages will indicate whether the build is successful or failed.
+
+3. Set Up a Pull Request Workflow for Merging to main:
+
+You want the changes to first be in the staging branch and then merged into main. Developers should open a PR to the staging branch, and once tested or approved, it can be merged into main.
+
+Here’s a summary of what you need to do:
+
+    Developers create pull requests (PRs) targeting the staging branch.
+    Once the changes are tested in staging, open a pull request from staging to main.
+    After the PR to main is merged, the production deployment will occur.
+
+4. Manual Merge to Production:
+
+After testing and validating the build in staging, you can manually merge changes into the main branch. To ensure the flow works smoothly, this manual merge should only happen after approval and successful testing in staging.
+Optional: Automatic Merge to main
+
+If you prefer automatic merging to main after changes are validated in staging, you can set up a GitHub Action to automatically merge PRs from staging to main once they are approved. However, manual approval is generally recommended for production environments.
+Final Workflow Summary:
+
+    Developer creates a PR to staging.
+    Changes in staging are built and pushed using GitHub Actions.
+    After testing, changes are manually merged into main.
+    GitHub Actions deploys the changes to production from main.
+
+With these changes, you can ensure that the developer changes go to staging first and are only promoted to production (main) after approval or testing.

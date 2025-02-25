@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbel version="1.0"
+      xmlns:bookmark="http://www.freedesktop.org/standards/desktop-bookmarks"
+      xmlns:mime="http://www.freedesktop.org/standards/shared-mime-info"
+>
+  <bookmark href="file:///home/reshmasree/Downloads/main%20to%20stage%20branch.txt" added="2025-02-25T09:33:57.971616Z" modified="2025-02-25T09:33:57.971621Z" visited="2025-02-25T09:33:57.971617Z">
+    <info>
+      <metadata owner="http://freedesktop.org">
+        <mime:mime-type type="text/plain"/>
+        <bookmark:applications>
+          <bookmark:application name="Firefox" exec="&apos;firefox_firefox %u&apos;" modified="2025-02-25T09:33:57.971619Z" count="1"/>
+        </bookmark:applications>
+      </metadata>
+    </info>
+  </bookmark>
+  <bookmark href="file:///home/reshmasree/Downloads/changes%20to%20stage.txt" added="2025-02-25T10:36:23.257961Z" modified="2025-02-25T10:36:23.257977Z" visited="2025-02-25T10:36:23.257964Z">
+    <info>
+      <metadata owner="http://freedesktop.org">
+        <mime:mime-type type="text/plain"/>
+        <bookmark:applications>
+          <bookmark:application name="Firefox" exec="&apos;firefox_firefox %u&apos;" modified="2025-02-25T10:36:23.257970Z" count="1"/>
+        </bookmark:applications>
+      </metadata>
+    </info>
+  </bookmark>
+  <bookmark href="file:///home/reshmasree/Downloads/steps%20to%20stage%20from%20main.txt" added="2025-02-25T11:07:16.676514Z" modified="2025-02-25T11:07:16.676525Z" visited="2025-02-25T11:07:16.676516Z">
+    <info>
+      <metadata owner="http://freedesktop.org">
+        <mime:mime-type type="text/plain"/>
+        <bookmark:applications>
+          <bookmark:application name="Firefox" exec="&apos;firefox_firefox %u&apos;" modified="2025-02-25T11:07:16.676519Z" count="1"/>
+        </bookmark:applications>
+      </metadata>
+    </info>
+  </bookmark>
+</xbel>

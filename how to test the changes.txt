@@ -1,0 +1,59 @@
+1. Verify Branch Protection Rules
+
+Go to your GitHub Repository → Settings → Branches and check that:
+
+    main branch does not allow direct pushes.
+    staging branch does not allow direct pushes (optional review allowed).
+    Pull Requests (PRs) are required for merging into both branches.
+
+✅ If correct, move to the next step.
+2. Create a Test Feature Branch
+
+In your local repository, create a new branch:
+
+git checkout -b test-feature
+
+✅ This ensures the developer is working on a feature branch instead of directly on staging or main.
+3. Make and Push Some Changes
+
+Modify a file (e.g., app.py) and commit:
+
+echo "print('Testing Staging Workflow')" >> app.py
+git add .
+git commit -m "Test: Added print statement"
+git push origin test-feature
+
+✅ Now, your changes are in the test-feature branch on GitHub.
+4. Open a Pull Request to staging
+
+    Go to GitHub → Your Repository.
+    Click Pull Requests → New Pull Request.
+    Select:
+        Base branch: staging
+        Compare branch: test-feature
+    Click Create Pull Request.
+    Request a review and approve the PR.
+    Click Merge Pull Request.
+
+✅ Now, your changes are in staging but NOT in main.
+5. Verify GitHub Actions Workflow for staging
+
+    Go to GitHub → Actions.
+    Check if the workflow triggered for the staging branch.
+    If successful, Docker should build and push the image for staging.
+
+✅ If successful, the image was pushed for staging.
+6. Merge staging into main
+
+    Create a PR from staging to main.
+    Get approval for merging.
+    Merge the PR into main.
+
+✅ Now, the changes are in main, and the production build will start.
+7. Verify Production Deployment
+
+    Go to GitHub Actions.
+    Check if the workflow triggered for main.
+    Confirm that the Docker image is built and pushed for production.
+
+✅ If successful, your setup is working! 🎉

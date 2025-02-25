@@ -1,0 +1,147 @@
+                                                                    main to staging branch
+
+
+step 1.  Developers will create pull requests (PRs) targeting the staging branch first, instead of main
+
+step 2. Modify Workflow to Trigger on staging Branch to update the trigger for stage branch we need to made the changes to workflow
+
+
+on:
+workflow_dispatch: {}
+push:
+branches:
+- "main"
+- "staging" ( Add staging branch trigger)
+- "release/*"
+
+
+step 3.  Adding code for separate builds staging and main branch
+
+
+
+jobs:
+docker:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout
+uses: actions/checkout@v3
+
+- name: Export repository name to GitHub env
+run: |
+echo "REPO=$(printf ${GITHUB_REPOSITORY} | sed 's~dhanmitra/~~g')" >> $GITHUB_ENV
+
+- name: Export commit ID to GitHub env
+run: |
+echo "COMMIT_ID=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+
+- name: Export image tag to GitHub env
+run: |
+echo "TAG=$(echo ${GITHUB_REF_NAME} | sed 's~/~_~g')" >> $GITHUB_ENV
+
+- name: Set up QEMU
+uses: docker/setup-qemu-action@v2
+
+- name: Set up Docker Buildx
+uses: docker/setup-buildx-action@v2
+
+- name: Login to Docker Hub
+uses: docker/login-action@v2
+with:
+username: ${{ secrets.DOCKERHUB_USERNAME }}
+password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+- name: Build and Push for Staging or Production
+uses: docker/build-push-action@v6
+id: dockerbuild
+continue-on-error: true
+with:
+context: .
+platforms: linux/arm64
+push: true
+tags: |
+dhanmitra/${{ env.REPO }}:${{ env.TAG }}-${{ github.ref_name }}
+# Add a condition to use staging/production tags
+if [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+echo "Building for Staging"
+# For Staging, use a specific tag
+docker tag ${{ steps.dockerbuild.outputs.ImageID }} dhanmitra/${{ env.REPO }}:staging-${{ env.TAG }}
+elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+echo "Building for Production"
+# For Production, use the latest tag
+docker tag ${{ steps.dockerbuild.outputs.ImageID }} dhanmitra/${{ env.REPO }}:latest
+fi
+
+Explanation of Changes:
+
+Push Event:
+The push event is set to trigger on both staging and main. This allows you to differentiate between the two environments.
+
+Logic for staging vs main:
+Inside the Build and Push step, we added an if condition that checks the branch (github.ref).
+For staging, we tag the image with staging-{tag} (you can adjust this to match your tagging convention).
+For production, we tag the image with latest, which is common for production builds.
+
+Docker Tags:
+Docker images are tagged differently based on whether the build is for staging or production. For example:If the build is for staging, you may tag the image as dhanmitra/repo:staging-<tag>.
+If the build is for main, you can tag the image as dhanmitra/repo:latest.
+
+Slack Notification for Different Environments:
+You may also want to send different Slack notifications depending on whether the build was for staging or production. This helps to clarify whether the build was successful or failed in the correct environment.
+
+
+
+step 4.  Pull Request Workflow for Staging and Main Branches
+
+step 4.1:      Set Branch Protection Rules for main and staging
+
+To ensure that PRs are required to merge code into main (production), configure branch protection.
+
+Go to GitHub Settings:
+
+Navigate to the repository in GitHub.
+Click on Settings at the top of the page.
+In the left sidebar, click Branches.
+Protect the main Branch:
+
+Click on Add rule under "Branch protection rules."
+Select the main branch.
+Enable the following settings:Require pull request reviews before merging (ensures code is reviewed before merging).
+                                                                 Require status checks to pass before merging (ensures tests pass before merging).
+Save the changes.
+
+
+Step 4.2: Define the Workflow for Developers to Create PRs
+              Create a PR from Feature Branch to staging
+When developers are ready to submit their changes, they will create a PR from their feature branch to the staging branch.
+
+Create a Feature Branch
+
+Developers should create a new feature branch from staging to work on their feature or fix
+
+Open a Pull Request to staging:
+
+Go to the GitHub repository.
+Click Pull requests → New pull request.
+Select staging as the base branch and feature-branch as the compare branch.
+Click Create Pull Request and provide a description.
+Assign reviewers for approval.
+
+
+
+step 5. Reviewing and Merging into staging
+
+
+step 6.  Made a PR from staging to main
+
+step.7  Merge to main(production)
+
+
+
+
+
+
+
+
+
+
+

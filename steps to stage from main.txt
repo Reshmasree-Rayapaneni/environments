@@ -1,0 +1,51 @@
+STEP 1: PROTECT THE MAIN BRANCH TO PREVENT DIRECT COMMITS
+
+Go to your repository on GitHub.
+    Click Settings → Branches.
+    Under Branch protection rules, click Add branch protection rule.
+    In the Branch name pattern, enter main.
+    Enable the following options:
+        ✅ Require a pull request before merging
+        ✅ Require status checks to pass before merging
+        ✅ Include administrators (optional)
+        ✅ Require at least one approving review
+        ✅ Do not allow direct pushes
+    Click Save Changes.
+    
+STEP 2: PROTECT THE STAGING BRANCH TO PREVENT DIRECT COMMITS
+
+Similarly, protect the staging branch so that developers can only push changes through Pull Requests.
+How to Enable Branch Protection for staging:
+
+    Repeat the same steps as Step 1, but for the staging branch.
+    In Branch name pattern, enter staging.
+    Enable the same protection rules as main, except:
+        You can allow merging without review     
+        
+STEP 3: DEVELOPER WORKFLOW 
+1. Developer Creates a Feature Branch
+2. Make Changes and Push to GitHub
+
+STEP 4: CREATE A PULL REQUEST TO STAGING
+Select:
+        Base branch: staging
+        Compare branch: feature-branch
+        
+        
+STEP 5: TEST CHANGES IN STAGING
+Updating Workflow to Build Docker Image from staging
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - "staging"  
+      - "main"      
+      - "release/*"
+      
+STEP 6: MERGE STAGING TO MAIN FOR PRODUCTION
+
+Once the changes in staging are fully tested and approved, merge them into main.      
+        
+
+    
+    

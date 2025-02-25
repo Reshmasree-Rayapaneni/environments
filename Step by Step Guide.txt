@@ -1,0 +1,135 @@
+Step-by-Step Guide: Enforcing a staging First Workflow Before main Deployment
+
+Currently, changes made by developers are going directly to production (main). You want to ensure changes first go to the staging branch for testing before being merged into main. Here’s how to set this up in a structured, step-by-step manner:
+
+STEP 1: PROTECT THE MAIN BRANCH TO PREVENT DIRECT COMMITS
+
+To prevent changes from going directly to production, you need to protect the main branch.
+How to Enable Branch Protection for main:
+
+    Go to your repository on GitHub.
+    Click Settings → Branches.
+    Under Branch protection rules, click Add branch protection rule.
+    In the Branch name pattern, enter main.
+    Enable the following options:
+        ✅ Require a pull request before merging
+        ✅ Require status checks to pass before merging
+        ✅ Include administrators (optional)
+        ✅ Require at least one approving review
+        ✅ Do not allow direct pushes
+    Click Save Changes.
+
+STEP 2: PROTECT THE STAGING BRANCH TO PREVENT DIRECT COMMITS
+
+Similarly, protect the staging branch so that developers can only push changes through Pull Requests (PRs).
+How to Enable Branch Protection for staging:
+
+    Repeat the same steps as Step 1, but for the staging branch.
+    In Branch name pattern, enter staging.
+    Enable the same protection rules as main, except:
+        You can allow merging without review (optional).
+
+Now, developers must create a Pull Request to move changes from their feature branches into staging.
+
+STEP 3: DEVELOPER WORKFLOW (MAKING CHANGES)
+
+Now that the branches are protected, developers must follow this workflow to make changes.
+1. Developer Creates a Feature Branch
+
+Developers should create a new branch for their feature:
+
+git checkout -b feature-branch
+
+2. Make Changes and Push to GitHub
+
+After making necessary changes, the developer commits and pushes the branch:
+
+git add .
+git commit -m "Added new feature"
+git push origin feature-branch
+
+STEP 4: CREATE A PULL REQUEST TO STAGING
+
+    Go to GitHub → Your Repository.
+    Click Pull requests → New pull request.
+    Select:
+        Base branch: staging
+        Compare branch: feature-branch
+    Click Create Pull Request.
+    Assign reviewers to check the changes.
+    Once approved, merge the PR into staging.
+
+✅ Now, the changes are in staging, but NOT in main yet.
+
+
+STEP 5: TEST CHANGES IN STAGING
+
+Since your GitHub Actions workflow currently runs on main, modify it to run on staging for testing before production deployment.
+Update Your Workflow to Build Docker Image from staging
+
+Edit your workflow (.github/workflows/docker-build-push.yml) so it runs on staging as well:
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - "staging"   # Run build on staging
+      - "main"      # Run build on main
+      - "release/*"
+
+✅ Now, every push to staging will build the Docker image for testing.
+
+STEP 6: MERGE STAGING TO MAIN FOR PRODUCTION
+
+Once the changes in staging are fully tested and approved, merge them into main.
+How to Merge staging into main:
+
+    Go to GitHub → Pull Requests → New Pull Request.
+    Select:
+        Base branch: main
+        Compare branch: staging
+    Click Create Pull Request.
+    Assign a reviewer for final approval.
+    Once reviewed and approved, merge the PR into main.
+
+✅ Now, the changes are in production! 🎉
+
+STEP 7: AUTOMATE THE MERGE OF STAGING → MAIN (OPTIONAL)
+
+If you want to automate merging staging into main when it is approved, follow these steps:
+1. Create a GitHub Actions Workflow for Auto-Merging
+
+Create a new workflow file:
+
+📂 .github/workflows/auto-merge.yml
+
+name: Auto Merge Staging to Main
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Enable Auto-Merge for PRs
+        run: |
+          gh pr merge $(gh pr list --state open --base main --head staging --json number --jq '.[0].number') --merge --admin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+✅ Now, when a PR from staging to main is approved, GitHub Actions will automatically merge it.
+Final Workflow Summary
+
+    Developer creates a feature branch and pushes changes.
+    Pull Request is made to staging.
+    Changes in staging are tested.
+    If stable, a PR is created from staging to main.
+    Once merged into main, production deployment happens.

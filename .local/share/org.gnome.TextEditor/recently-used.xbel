@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbel version="1.0"
+      xmlns:bookmark="http://www.freedesktop.org/standards/desktop-bookmarks"
+      xmlns:mime="http://www.freedesktop.org/standards/shared-mime-info"
+>
+  <bookmark href="file:///home/reshmasree/Downloads/changes%20to%20stage.txt" added="2025-02-25T10:36:45.508080Z" modified="2025-02-25T11:20:48.510198Z" visited="2025-02-25T16:06:42.070118+05:30">
+    <info>
+      <metadata owner="http://freedesktop.org">
+        <bookmark:applications>
+          <bookmark:application name="gnome-text-editor" exec="&apos;gnome-text-editor %u&apos;" modified="2025-02-25T11:20:48.510195Z" count="62"/>
+        </bookmark:applications>
+      </metadata>
+    </info>
+  </bookmark>
+  <bookmark href="file:///home/reshmasree/Step%20by%20Step%20Guide.txt" added="2025-02-25T10:52:56.510751Z" modified="2025-02-25T11:20:48.510210Z" visited="2025-02-25T16:22:52.943664+05:30">
+    <info>
+      <metadata owner="http://freedesktop.org">
+        <bookmark:applications>
+          <bookmark:application name="gnome-text-editor" exec="&apos;gnome-text-editor %u&apos;" modified="2025-02-25T11:20:48.510209Z" count="44"/>
+        </bookmark:applications>
+      </metadata>
+    </info>
+  </bookmark>
+  <bookmark href="file:///home/reshmasree/steps%20to%20stage%20from%20main.txt" added="2025-02-25T11:04:28.514975Z" modified="2025-02-25T11:20:48.510213Z" visited="2025-02-25T16:34:24.917927+05:30">
+    <info>
+      <metadata owner="http://freedesktop.org">
+        <bookmark:applications>
+          <bookmark:application name="gnome-text-editor" exec="&apos;gnome-text-editor %u&apos;" modified="2025-02-25T11:20:48.510212Z" count="4"/>
+        </bookmark:applications>
+      </metadata>
+    </info>
+  </bookmark>
+  <bookmark href="file:///home/reshmasree/how%20to%20test%20the%20changes.txt" added="2025-02-25T11:20:48.510203Z" modified="2025-02-25T11:20:48.510206Z" visited="2025-02-25T16:50:45.522807+05:30">
+    <info>
+      <metadata owner="http://freedesktop.org">
+        <bookmark:applications>
+          <bookmark:application name="gnome-text-editor" exec="&apos;gnome-text-editor %u&apos;" modified="2025-02-25T11:20:48.510203Z" count="1"/>
+        </bookmark:applications>
+      </metadata>
+    </info>
+  </bookmark>
+</xbel>
