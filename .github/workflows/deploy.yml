@@ -19,7 +19,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          IMAGE_NAME="Reshmasree2710/environments"
+          IMAGE_NAME="Reshmasree_2710/environments"
           TAG=${{ github.ref_name }}
           docker build -t $IMAGE_NAME:$TAG .
           docker push $IMAGE_NAME:$TAG
