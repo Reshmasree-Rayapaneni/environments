@@ -1,0 +1,30 @@
+services:
+  postgres:
+    container_name: dm-postgres-dev
+    image: postgres:latest
+    platform: linux/amd64
+    restart: always
+    environment:
+      POSTGRES_USER: dhanmitra
+      POSTGRES_PASSWORD: dhanmitra
+    ports:
+      - "5433:5432"  # Change port to avoid conflicts with production
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+
+  minio:
+    container_name: dm-minio-dev
+    image: minio/minio:latest
+    ports:
+      - "9002:9000"  # Change ports to avoid conflicts
+      - "9003:9001"
+    volumes:
+      - minio-data-dev:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server --console-address ":9003" /data
+
+volumes:
+  postgres_data_dev:
+  minio-data-dev:
